@@ -159,6 +159,8 @@ public class AddressBook {
      * If the first non-whitespace character in a user's input line is this, that line will be ignored.
      */
     private static final char INPUT_COMMENT_MARKER = '#';
+    private static final int MAX_NUMBER_OF_ARGS = 1;
+    
 
     /*
      * This variable is declared for the whole class (instead of declaring it
@@ -257,7 +259,7 @@ public class AddressBook {
      * @param args full program arguments passed to application main method
      */
     private static void processProgramArgs(String[] args) {
-        if (args.length >= 2) {
+        if (args.length > MAX_NUMBER_OF_ARGS) {
             showToUser(MESSAGE_INVALID_PROGRAM_ARGS);
             exitProgram();
         }
@@ -321,7 +323,9 @@ public class AddressBook {
         } catch (InvalidPathException ipe) {
             return false;
         }
-        return hasValidParentDirectory(filePathToValidate) && hasValidFileName(filePathToValidate);
+
+        boolean isValid = hasValidParentDirectory(filePathToValidate) && hasValidFileName(filePathToValidate);
+        return isValid;
     }
 
     /**
@@ -339,8 +343,11 @@ public class AddressBook {
      * If a file already exists, it must be a regular file.
      */
     private static boolean hasValidFileName(Path filePath) {
-        return filePath.getFileName().toString().lastIndexOf('.') > 0
-                && (!Files.exists(filePath) || Files.isRegularFile(filePath));
+        boolean isValidName, isValidFile, isValid;
+        isValidName = filePath.getFileName().toString().lastIndexOf('.') > 0;
+        isValidFile = !Files.exists(filePath) || Files.isRegularFile(filePath);
+        isValid = isValidName && isValidFile;
+        return isValid;
     }
 
     /**
@@ -602,11 +609,16 @@ public class AddressBook {
         System.out.print(LINE_PREFIX + "Enter command: ");
         String inputLine = SCANNER.nextLine();
         // silently consume all blank and comment lines
-        while (inputLine.trim().isEmpty() || inputLine.trim().charAt(0) == INPUT_COMMENT_MARKER) {
-            inputLine = SCANNER.nextLine();
-        }
+        inputLine = consumeBlankAndCommentLines(inputLine);
         return inputLine;
     }
+
+	private static String consumeBlankAndCommentLines(String inputLine) {
+		while (inputLine.trim().isEmpty() || inputLine.trim().charAt(0) == INPUT_COMMENT_MARKER) {
+            inputLine = SCANNER.nextLine();
+        }
+		return inputLine;
+	}
 
    /*
     * NOTE : =============================================================
@@ -794,11 +806,11 @@ public class AddressBook {
      * @return true if the given person was found and deleted in the model
      */
     private static boolean deletePersonFromAddressBook(String[] exactPerson) {
-        final boolean changed = ALL_PERSONS.remove(exactPerson);
-        if (changed) {
+        final boolean isChanged = ALL_PERSONS.remove(exactPerson);
+        if (isChanged) {
             savePersonsToFile(getAllPersonsInAddressBook(), storageFilePath);
         }
-        return changed;
+        return isChanged;
     }
 
     /**
@@ -1150,8 +1162,8 @@ public class AddressBook {
      * @param sign  Parameter sign to be removed
      * @return  string without the sign
      */
-    private static String removePrefixSign(String s, String sign) {
-        return s.replace(sign, "");
+    private static String removePrefixSign(String stringWithPrefixSign, String sign) {
+        return stringWithPrefixSign.replace(sign, "");
     }
 
     /**
