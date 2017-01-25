@@ -154,6 +154,12 @@ public class AddressBook {
      * Offset required to convert between 1-indexing and 0-indexing.COMMAND_
      */
     private static final int DISPLAYED_INDEX_OFFSET = 1;
+    
+    /**
+     * Maximum number of arguments.
+     */
+    private static final int MAX_NUMBER_OF_ARGUMENTS = 1;
+    
 
     /**
      * If the first non-whitespace character in a user's input line is this, that line will be ignored.
@@ -257,7 +263,7 @@ public class AddressBook {
      * @param args full program arguments passed to application main method
      */
     private static void processProgramArgs(String[] args) {
-        if (args.length >= 2) {
+        if (args.length > MAX_NUMBER_OF_ARGUMENTS) {
             showToUser(MESSAGE_INVALID_PROGRAM_ARGS);
             exitProgram();
         }
@@ -339,8 +345,9 @@ public class AddressBook {
      * If a file already exists, it must be a regular file.
      */
     private static boolean hasValidFileName(Path filePath) {
-        return filePath.getFileName().toString().lastIndexOf('.') > 0
-                && (!Files.exists(filePath) || Files.isRegularFile(filePath));
+    	boolean isValidFileName = filePath.getFileName().toString().lastIndexOf('.') > 0;
+    	boolean isValidFile = !Files.exists(filePath) || Files.isRegularFile(filePath);
+        return isValidFileName && isValidFile;
     }
 
     /**
@@ -602,11 +609,21 @@ public class AddressBook {
         System.out.print(LINE_PREFIX + "Enter command: ");
         String inputLine = SCANNER.nextLine();
         // silently consume all blank and comment lines
-        while (inputLine.trim().isEmpty() || inputLine.trim().charAt(0) == INPUT_COMMENT_MARKER) {
-            inputLine = SCANNER.nextLine();
-        }
+        inputLine = consumeBlankAndCommentLines(inputLine);
         return inputLine;
     }
+    
+    /**
+     * Remove blank lines and comment lines from the text entered by the user
+     * @param inputLine
+     * @return inputLine without blank lines or comment lines
+     */
+	private static String consumeBlankAndCommentLines(String inputLine) {
+		while (inputLine.trim().isEmpty() || inputLine.trim().charAt(0) == INPUT_COMMENT_MARKER) {
+            inputLine = SCANNER.nextLine();
+        }
+		return inputLine;
+	}
 
    /*
     * NOTE : =============================================================
@@ -1146,12 +1163,12 @@ public class AddressBook {
     /**
      * Removes sign(p/, d/, etc) from parameter string
      *
-     * @param s  Parameter as a string
+     * @param stringWithPrefixSign  Parameter as a string
      * @param sign  Parameter sign to be removed
      * @return  string without the sign
      */
-    private static String removePrefixSign(String s, String sign) {
-        return s.replace(sign, "");
+    private static String removePrefixSign(String stringWithPrefixSign, String sign) {
+        return stringWithPrefixSign.replace(sign, "");
     }
 
     /**
