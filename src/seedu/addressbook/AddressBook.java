@@ -214,7 +214,20 @@ public class AddressBook {
 
     public static void main(String[] args) {
         showWelcomeMessage();
-        processProgramArgs(args);
+        
+        if (args.length > MAX_NUMBER_OF_ARGUMENTS) {
+            showToUser(MESSAGE_INVALID_PROGRAM_ARGS);
+            exitProgram();
+        }
+
+        if (args.length == 1) {
+            setupGivenFileForStorage(args[0]);
+        }
+
+        if(args.length == 0) {
+            setupDefaultFileForStorage();
+        }
+        
         loadDataFromStorage();
         while (true) {
             String userCommand = getUserInput();
@@ -262,7 +275,7 @@ public class AddressBook {
      *
      * @param args full program arguments passed to application main method
      */
-    private static void processProgramArgs(String[] args) {
+    /*private static void processProgramArgs(String[] args) {
         if (args.length > MAX_NUMBER_OF_ARGUMENTS) {
             showToUser(MESSAGE_INVALID_PROGRAM_ARGS);
             exitProgram();
@@ -275,7 +288,7 @@ public class AddressBook {
         if(args.length == 0) {
             setupDefaultFileForStorage();
         }
-    }
+    }*/
 
     /**
      * Sets up the storage file based on the supplied file path.
@@ -1006,12 +1019,12 @@ public class AddressBook {
 
         // phone is last arg, target is from prefix to end of string
         if (indexOfPhonePrefix > indexOfEmailPrefix) {
-            return removePrefixSign(encoded.substring(indexOfPhonePrefix, encoded.length()).trim(),
+            return removePrefix(encoded.substring(indexOfPhonePrefix, encoded.length()).trim(),
                     PERSON_DATA_PREFIX_PHONE);
 
         // phone is middle arg, target is from own prefix to next prefix
         } else {
-            return removePrefixSign(
+            return removePrefix(
                     encoded.substring(indexOfPhonePrefix, indexOfEmailPrefix).trim(),
                     PERSON_DATA_PREFIX_PHONE);
         }
@@ -1029,12 +1042,12 @@ public class AddressBook {
 
         // email is last arg, target is from prefix to end of string
         if (indexOfEmailPrefix > indexOfPhonePrefix) {
-            return removePrefixSign(encoded.substring(indexOfEmailPrefix, encoded.length()).trim(),
+            return removePrefix(encoded.substring(indexOfEmailPrefix, encoded.length()).trim(),
                     PERSON_DATA_PREFIX_EMAIL);
 
         // email is middle arg, target is from own prefix to next prefix
         } else {
-            return removePrefixSign(
+            return removePrefix(
                     encoded.substring(indexOfEmailPrefix, indexOfPhonePrefix).trim(),
                     PERSON_DATA_PREFIX_EMAIL);
         }
@@ -1163,12 +1176,12 @@ public class AddressBook {
     /**
      * Removes sign(p/, d/, etc) from parameter string
      *
-     * @param stringWithPrefixSign  Parameter as a string
+     * @param fullString  Parameter as a string
      * @param sign  Parameter sign to be removed
      * @return  string without the sign
      */
-    private static String removePrefixSign(String stringWithPrefixSign, String sign) {
-        return stringWithPrefixSign.replace(sign, "");
+    private static String removePrefix(String fullString, String sign) {
+        return fullString.replace(sign, "");
     }
 
     /**
